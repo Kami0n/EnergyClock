@@ -1,0 +1,610 @@
+[
+    {
+        "id": "b97fba5e188770e4",
+        "type": "http request",
+        "z": "033de1e496417ec1",
+        "name": "Prevzem/Proizvodnja",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://www.eles.si/prevzem-in-proizvodnja",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 160,
+        "y": 420,
+        "wires": [
+            [
+                "cab8910a3a207784"
+            ]
+        ]
+    },
+    {
+        "id": "8f30cd4ff6bfd976",
+        "type": "inject",
+        "z": "033de1e496417ec1",
+        "name": "Start requests",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "3600",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "timestamp",
+        "payloadType": "date",
+        "x": 120,
+        "y": 160,
+        "wires": [
+            [
+                "3c42094680c4a439"
+            ]
+        ]
+    },
+    {
+        "id": "9911fcb1a6fca085",
+        "type": "debug",
+        "z": "033de1e496417ec1",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1030,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "12124ae037ac1cad",
+        "type": "json",
+        "z": "033de1e496417ec1",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 850,
+        "y": 420,
+        "wires": [
+            [
+                "9911fcb1a6fca085",
+                "ee7a5b1d66c954b7"
+            ]
+        ]
+    },
+    {
+        "id": "3c42094680c4a439",
+        "type": "http request",
+        "z": "033de1e496417ec1",
+        "name": "Sunrise/Sunset",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://api.sunrise-sunset.org/json?lat=45.8978927&lng=13.8607969&formatted=0",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 480,
+        "y": 120,
+        "wires": [
+            [
+                "2a5b923a5902cab6"
+            ]
+        ]
+    },
+    {
+        "id": "2a5b923a5902cab6",
+        "type": "json",
+        "z": "033de1e496417ec1",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 630,
+        "y": 120,
+        "wires": [
+            [
+                "20806fea93ebf6f6"
+            ]
+        ]
+    },
+    {
+        "id": "8c3ee4ee10d06827",
+        "type": "inject",
+        "z": "033de1e496417ec1",
+        "d": true,
+        "name": "Start solar",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "timestamp",
+        "payloadType": "date",
+        "x": 100,
+        "y": 40,
+        "wires": [
+            [
+                "d69f38e1bb022981"
+            ]
+        ]
+    },
+    {
+        "id": "d69f38e1bb022981",
+        "type": "http request",
+        "z": "033de1e496417ec1",
+        "d": true,
+        "name": "Solar Radiation",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://api.solcast.com.au/world_radiation/estimated_actuals.json?latitude=46.056947&longitude=14.505752&hours=48&api_key=Cg02yqJmjzzolfgMIBrbvf2S-x6lB8pk",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 260,
+        "y": 40,
+        "wires": [
+            [
+                "887c5472af05967e"
+            ]
+        ]
+    },
+    {
+        "id": "2091ea08ef29fab0",
+        "type": "debug",
+        "z": "033de1e496417ec1",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 650,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "20806fea93ebf6f6",
+        "type": "function",
+        "z": "033de1e496417ec1",
+        "name": "Determine if day",
+        "func": "let sunrise = msg.payload.results.sunrise;\nsunrise = new Date(sunrise);\nmsg.payload.sunrise = sunrise.getHours();\n\nlet sunset = msg.payload.results.sunset;\nsunset = new Date(sunset);\nmsg.payload.sunset = sunset.getHours();\n\nlet trenutno = new Date();\n// machinations for time zone...\ntrenutno = trenutno - (trenutno.getTimezoneOffset() * 60000);\ntrenutno = new Date(trenutno);\nmsg.payload.trenutno = trenutno;\n\nif( sunrise < trenutno && trenutno < sunset ){\n    msg.payload.isDay = true;\n}\nelse{\n    msg.payload.isDay = false;\n}\n\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 780,
+        "y": 120,
+        "wires": [
+            [
+                "c74c6bccf817c1bb",
+                "bd83b760919e02ba",
+                "b97fba5e188770e4",
+                "5459d9ebe7a48331"
+            ]
+        ]
+    },
+    {
+        "id": "c74c6bccf817c1bb",
+        "type": "switch",
+        "z": "033de1e496417ec1",
+        "name": "Decision day",
+        "property": "payload.isDay",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "true"
+            },
+            {
+                "t": "false"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 170,
+        "y": 240,
+        "wires": [
+            [
+                "8337b48eec8589b3",
+                "75bab5d388042e12"
+            ],
+            [
+                "b3de892471e8c8d6"
+            ]
+        ]
+    },
+    {
+        "id": "b3de892471e8c8d6",
+        "type": "debug",
+        "z": "033de1e496417ec1",
+        "name": "Night (check if low tarif)",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 390,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "8337b48eec8589b3",
+        "type": "debug",
+        "z": "033de1e496417ec1",
+        "name": "Day (check if solar estimated or predicted electricity )",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 480,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "4ee36f4c8b618570",
+        "type": "function",
+        "z": "033de1e496417ec1",
+        "name": "Check request",
+        "func": "if(msg.payload){\n    const mssg = JSON.parse(msg.payload);\n    if(mssg.request === true){\n        console.log('true');\n        msg.payload = Date.now();\n        msg.topic = 'timestamp';\n    }\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 260,
+        "y": 100,
+        "wires": [
+            [
+                "3c42094680c4a439"
+            ]
+        ]
+    },
+    {
+        "id": "2aa3389b4a03b7c1",
+        "type": "websocket in",
+        "z": "033de1e496417ec1",
+        "name": "",
+        "server": "f944bdd943657205",
+        "client": "",
+        "x": 90,
+        "y": 100,
+        "wires": [
+            [
+                "4ee36f4c8b618570"
+            ]
+        ]
+    },
+    {
+        "id": "81f0a12f919f328f",
+        "type": "websocket out",
+        "z": "033de1e496417ec1",
+        "name": "",
+        "server": "0f63c16d83355a50",
+        "client": "",
+        "x": 920,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "ee7a5b1d66c954b7",
+        "type": "function",
+        "z": "033de1e496417ec1",
+        "name": "Fix: WS payload",
+        "func": "return {payload: msg.payload};",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 740,
+        "y": 500,
+        "wires": [
+            [
+                "81f0a12f919f328f"
+            ]
+        ]
+    },
+    {
+        "id": "6833937e81967912",
+        "type": "function",
+        "z": "033de1e496417ec1",
+        "name": "Stringify",
+        "func": "msg.payload = JSON.stringify(msg.payload);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 640,
+        "y": 300,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "6cbec2e9dd8a5b7d",
+        "type": "json",
+        "z": "033de1e496417ec1",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": true,
+        "x": 450,
+        "y": 300,
+        "wires": [
+            [
+                "6833937e81967912",
+                "2091ea08ef29fab0"
+            ]
+        ]
+    },
+    {
+        "id": "0205c0013f5167ac",
+        "type": "inject",
+        "z": "033de1e496417ec1",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "timestamp",
+        "payload": "{\"estimated_actuals\":[{\"ghi\":68,\"ebh\":25,\"dni\":147,\"dhi\":42,\"cloud_opacity\":11,\"period_end\":\"2022-04-23T17:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":138,\"ebh\":63,\"dni\":317,\"dhi\":74,\"cloud_opacity\":10,\"period_end\":\"2022-04-23T17:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":160,\"ebh\":37,\"dni\":117,\"dhi\":123,\"cloud_opacity\":36,\"period_end\":\"2022-04-23T16:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":316,\"ebh\":198,\"dni\":509,\"dhi\":117,\"cloud_opacity\":7,\"period_end\":\"2022-04-23T16:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":233,\"ebh\":41,\"dni\":89,\"dhi\":193,\"cloud_opacity\":45,\"period_end\":\"2022-04-23T15:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":242,\"ebh\":14,\"dni\":26,\"dhi\":227,\"cloud_opacity\":54,\"period_end\":\"2022-04-23T15:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":278,\"ebh\":25,\"dni\":41,\"dhi\":252,\"cloud_opacity\":54,\"period_end\":\"2022-04-23T14:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":135,\"ebh\":1,\"dni\":2,\"dhi\":134,\"cloud_opacity\":79,\"period_end\":\"2022-04-23T14:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":288,\"ebh\":12,\"dni\":17,\"dhi\":276,\"cloud_opacity\":61,\"period_end\":\"2022-04-23T13:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":96,\"ebh\":1,\"dni\":1,\"dhi\":95,\"cloud_opacity\":87,\"period_end\":\"2022-04-23T13:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":281,\"ebh\":9,\"dni\":10,\"dhi\":273,\"cloud_opacity\":66,\"period_end\":\"2022-04-23T12:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":136,\"ebh\":1,\"dni\":1,\"dhi\":135,\"cloud_opacity\":83,\"period_end\":\"2022-04-23T12:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":457,\"ebh\":99,\"dni\":119,\"dhi\":359,\"cloud_opacity\":46,\"period_end\":\"2022-04-23T11:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":466,\"ebh\":45,\"dni\":54,\"dhi\":420,\"cloud_opacity\":46,\"period_end\":\"2022-04-23T11:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":337,\"ebh\":12,\"dni\":15,\"dhi\":325,\"cloud_opacity\":59,\"period_end\":\"2022-04-23T10:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":268,\"ebh\":6,\"dni\":7,\"dhi\":262,\"cloud_opacity\":66,\"period_end\":\"2022-04-23T10:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":374,\"ebh\":25,\"dni\":33,\"dhi\":349,\"cloud_opacity\":51,\"period_end\":\"2022-04-23T09:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":445,\"ebh\":84,\"dni\":120,\"dhi\":360,\"cloud_opacity\":37,\"period_end\":\"2022-04-23T09:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":408,\"ebh\":70,\"dni\":109,\"dhi\":337,\"cloud_opacity\":37,\"period_end\":\"2022-04-23T08:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":325,\"ebh\":36,\"dni\":62,\"dhi\":289,\"cloud_opacity\":43,\"period_end\":\"2022-04-23T08:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":313,\"ebh\":52,\"dni\":99,\"dhi\":260,\"cloud_opacity\":36,\"period_end\":\"2022-04-23T07:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":157,\"ebh\":7,\"dni\":16,\"dhi\":149,\"cloud_opacity\":62,\"period_end\":\"2022-04-23T07:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":84,\"ebh\":1,\"dni\":4,\"dhi\":82,\"cloud_opacity\":72,\"period_end\":\"2022-04-23T06:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":64,\"ebh\":1,\"dni\":4,\"dhi\":63,\"cloud_opacity\":70,\"period_end\":\"2022-04-23T06:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":31,\"ebh\":1,\"dni\":3,\"dhi\":31,\"cloud_opacity\":76,\"period_end\":\"2022-04-23T05:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":29,\"ebh\":2,\"dni\":12,\"dhi\":27,\"cloud_opacity\":50,\"period_end\":\"2022-04-23T05:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":4,\"ebh\":0,\"dni\":0,\"dhi\":4,\"cloud_opacity\":33,\"period_end\":\"2022-04-23T04:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":1,\"ebh\":0,\"dni\":0,\"dhi\":1,\"cloud_opacity\":36,\"period_end\":\"2022-04-23T04:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":20,\"period_end\":\"2022-04-23T03:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":36,\"period_end\":\"2022-04-23T03:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":6,\"period_end\":\"2022-04-23T02:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":46,\"period_end\":\"2022-04-23T02:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":0,\"period_end\":\"2022-04-23T01:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":7,\"period_end\":\"2022-04-23T01:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":66,\"period_end\":\"2022-04-23T00:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":86,\"period_end\":\"2022-04-23T00:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":61,\"period_end\":\"2022-04-22T23:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":68,\"period_end\":\"2022-04-22T23:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":46,\"period_end\":\"2022-04-22T22:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":35,\"period_end\":\"2022-04-22T22:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":33,\"period_end\":\"2022-04-22T21:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":20,\"period_end\":\"2022-04-22T21:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":33,\"period_end\":\"2022-04-22T20:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":36,\"period_end\":\"2022-04-22T20:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":32,\"period_end\":\"2022-04-22T19:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":32,\"period_end\":\"2022-04-22T19:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":1,\"ebh\":0,\"dni\":0,\"dhi\":1,\"cloud_opacity\":45,\"period_end\":\"2022-04-22T18:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":7,\"ebh\":0,\"dni\":0,\"dhi\":7,\"cloud_opacity\":60,\"period_end\":\"2022-04-22T18:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":62,\"ebh\":17,\"dni\":100,\"dhi\":44,\"cloud_opacity\":16,\"period_end\":\"2022-04-22T17:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":91,\"ebh\":10,\"dni\":48,\"dhi\":80,\"cloud_opacity\":43,\"period_end\":\"2022-04-22T17:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":114,\"ebh\":7,\"dni\":23,\"dhi\":107,\"cloud_opacity\":53,\"period_end\":\"2022-04-22T16:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":139,\"ebh\":6,\"dni\":16,\"dhi\":133,\"cloud_opacity\":59,\"period_end\":\"2022-04-22T16:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":151,\"ebh\":19,\"dni\":38,\"dhi\":133,\"cloud_opacity\":66,\"period_end\":\"2022-04-22T15:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":202,\"ebh\":8,\"dni\":14,\"dhi\":194,\"cloud_opacity\":60,\"period_end\":\"2022-04-22T15:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":143,\"ebh\":2,\"dni\":4,\"dhi\":141,\"cloud_opacity\":75,\"period_end\":\"2022-04-22T14:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":154,\"ebh\":2,\"dni\":3,\"dhi\":152,\"cloud_opacity\":76,\"period_end\":\"2022-04-22T14:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":160,\"ebh\":2,\"dni\":2,\"dhi\":158,\"cloud_opacity\":78,\"period_end\":\"2022-04-22T13:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":109,\"ebh\":0,\"dni\":0,\"dhi\":108,\"cloud_opacity\":86,\"period_end\":\"2022-04-22T13:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":33,\"ebh\":0,\"dni\":0,\"dhi\":33,\"cloud_opacity\":95,\"period_end\":\"2022-04-22T12:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":164,\"ebh\":1,\"dni\":1,\"dhi\":163,\"cloud_opacity\":81,\"period_end\":\"2022-04-22T12:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":107,\"ebh\":0,\"dni\":0,\"dhi\":107,\"cloud_opacity\":87,\"period_end\":\"2022-04-22T11:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":51,\"ebh\":0,\"dni\":0,\"dhi\":51,\"cloud_opacity\":93,\"period_end\":\"2022-04-22T11:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":126,\"ebh\":1,\"dni\":1,\"dhi\":125,\"cloud_opacity\":84,\"period_end\":\"2022-04-22T10:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":83,\"ebh\":0,\"dni\":0,\"dhi\":83,\"cloud_opacity\":90,\"period_end\":\"2022-04-22T10:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":113,\"ebh\":0,\"dni\":0,\"dhi\":112,\"cloud_opacity\":85,\"period_end\":\"2022-04-22T09:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":83,\"ebh\":0,\"dni\":0,\"dhi\":83,\"cloud_opacity\":88,\"period_end\":\"2022-04-22T09:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":31,\"ebh\":0,\"dni\":0,\"dhi\":31,\"cloud_opacity\":94,\"period_end\":\"2022-04-22T08:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":36,\"ebh\":0,\"dni\":0,\"dhi\":36,\"cloud_opacity\":93,\"period_end\":\"2022-04-22T08:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":76,\"ebh\":0,\"dni\":1,\"dhi\":75,\"cloud_opacity\":84,\"period_end\":\"2022-04-22T07:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":11,\"ebh\":0,\"dni\":0,\"dhi\":11,\"cloud_opacity\":96,\"period_end\":\"2022-04-22T07:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":9,\"ebh\":0,\"dni\":0,\"dhi\":9,\"cloud_opacity\":97,\"period_end\":\"2022-04-22T06:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":8,\"ebh\":0,\"dni\":0,\"dhi\":8,\"cloud_opacity\":95,\"period_end\":\"2022-04-22T06:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":5,\"ebh\":0,\"dni\":0,\"dhi\":5,\"cloud_opacity\":95,\"period_end\":\"2022-04-22T05:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":2,\"ebh\":0,\"dni\":0,\"dhi\":2,\"cloud_opacity\":93,\"period_end\":\"2022-04-22T05:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":96,\"period_end\":\"2022-04-22T04:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":97,\"period_end\":\"2022-04-22T04:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":97,\"period_end\":\"2022-04-22T03:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":97,\"period_end\":\"2022-04-22T03:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":96,\"period_end\":\"2022-04-22T02:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":97,\"period_end\":\"2022-04-22T02:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":97,\"period_end\":\"2022-04-22T01:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":93,\"period_end\":\"2022-04-22T01:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":17,\"period_end\":\"2022-04-22T00:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":18,\"period_end\":\"2022-04-22T00:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":97,\"period_end\":\"2022-04-21T23:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":97,\"period_end\":\"2022-04-21T23:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":96,\"period_end\":\"2022-04-21T22:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":97,\"period_end\":\"2022-04-21T22:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":97,\"period_end\":\"2022-04-21T21:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":94,\"period_end\":\"2022-04-21T21:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":83,\"period_end\":\"2022-04-21T20:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":77,\"period_end\":\"2022-04-21T20:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":84,\"period_end\":\"2022-04-21T19:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":87,\"period_end\":\"2022-04-21T19:00:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":0,\"ebh\":0,\"dni\":0,\"dhi\":0,\"cloud_opacity\":79,\"period_end\":\"2022-04-21T18:30:00.0000000Z\",\"period\":\"PT30M\"},{\"ghi\":2,\"ebh\":0,\"dni\":0,\"dhi\":2,\"cloud_opacity\":85,\"period_end\":\"2022-04-21T18:00:00.0000000Z\",\"period\":\"PT30M\"}]}",
+        "payloadType": "str",
+        "x": 450,
+        "y": 40,
+        "wires": [
+            [
+                "887c5472af05967e"
+            ]
+        ]
+    },
+    {
+        "id": "887c5472af05967e",
+        "type": "json",
+        "z": "033de1e496417ec1",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 570,
+        "y": 40,
+        "wires": [
+            [
+                "0e01a5e40f926a33"
+            ]
+        ]
+    },
+    {
+        "id": "a7f301dcf6e35459",
+        "type": "comment",
+        "z": "033de1e496417ec1",
+        "name": "",
+        "info": "IF:\n\n- dan = true\n- estimated W/m2 > 100\n\t-> preglej od zdej do večera ali bo W/m2 > 100\n\nali\n- predicted prevzem < predicted proizvodnja\n\t-> preglej od zdej do polnoči\n\t",
+        "x": 120,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "75bab5d388042e12",
+        "type": "Cache in",
+        "z": "033de1e496417ec1",
+        "name": "",
+        "cache": "197be46cfd8e7b1a",
+        "keyType": "msg",
+        "keyProperty": "topic",
+        "valueType": "msg",
+        "valueProperty": "payload",
+        "useString": false,
+        "outputs": 1,
+        "x": 330,
+        "y": 300,
+        "wires": [
+            [
+                "6cbec2e9dd8a5b7d"
+            ]
+        ]
+    },
+    {
+        "id": "0e01a5e40f926a33",
+        "type": "Cache out",
+        "z": "033de1e496417ec1",
+        "name": "",
+        "cache": "197be46cfd8e7b1a",
+        "keyType": "msg",
+        "keyProperty": "topic",
+        "valueType": "msg",
+        "valueProperty": "payload",
+        "ttlType": "msg",
+        "ttlProperty": "",
+        "useString": false,
+        "x": 690,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "cab8910a3a207784",
+        "type": "html",
+        "z": "033de1e496417ec1",
+        "name": "div",
+        "property": "payload",
+        "outproperty": "payload",
+        "tag": "div.ModKiviElesGraphC",
+        "ret": "html",
+        "as": "single",
+        "x": 330,
+        "y": 420,
+        "wires": [
+            [
+                "6870eb0c61567406"
+            ]
+        ]
+    },
+    {
+        "id": "6870eb0c61567406",
+        "type": "function",
+        "z": "033de1e496417ec1",
+        "name": "Clean HTML String",
+        "func": "var script = msg.payload[0];\n\nvar table = script.substring(\n    script.indexOf(\"series:\") + 10, \n    script.indexOf(\"}],\") + 1\n);\n\nvar data = table.split('{');\nfor (var i = 0; i < data.length; i++) {\n    data[i] = data[i].substring(\n        data[i].indexOf(\"[\") + 1, \n        data[i].indexOf(\"],\") - 1).split(',');\n}\n\nvar differences = [];\nvar sortedDifferences = [];\nfor (var j = 0; j < data[0].length; j++) {\n    differences.push(data[0][j] - data[2][j]);\n}\n\nsortedDifferences = differences.slice();\nsortedDifferences.sort(function(a, b) {\n  return a - b;\n});\n\nvar hourlyRanking = [];\nfor (var k = sortedDifferences.length - 1; k >= 0; k--) {\n    hourlyRanking.push(differences.indexOf(sortedDifferences[k]));\n}\n\nmsg.payload = hourlyRanking;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 490,
+        "y": 420,
+        "wires": [
+            [
+                "1f5c4b96eb110a33"
+            ]
+        ]
+    },
+    {
+        "id": "1f5c4b96eb110a33",
+        "type": "function",
+        "z": "033de1e496417ec1",
+        "name": "Determine Green",
+        "func": "var hr = msg.payload;\nvar sunrise = flow.get('sunrise');\nvar sunset = flow.get('sunset');\nvar trenutno = flow.get('trenutno');\n\n// var allHours = [...Array(24).keys()];\nvar greenHours = [];\nfor (var i = 0; i < 5; i++) {\n    if (hr[i] < sunrise || hr[i] > sunset) {\n        // hour is during night - hour is okay\n        greenHours.push(hr[i]);\n    } else {\n        // hour is during day - hour is during day, check solar\n        greenHours.push(hr[i]);\n    }\n}\n\nvar allHours = [];\nfor (var j = 0; j < 24; j++) {\n    if (greenHours.includes(j)) {\n        allHours.push( true ); // green\n    } else {\n        allHours.push( false ); // normal\n    }\n}\n\n\nmsg.payload =  {\"allHours\": allHours, \"trenutno\": trenutno};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 690,
+        "y": 420,
+        "wires": [
+            [
+                "12124ae037ac1cad"
+            ]
+        ]
+    },
+    {
+        "id": "bd83b760919e02ba",
+        "type": "change",
+        "z": "033de1e496417ec1",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "sunrise",
+                "pt": "flow",
+                "to": "payload.sunrise",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "sunset",
+                "pt": "flow",
+                "to": "payload.sunset",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "trenutno",
+                "pt": "flow",
+                "to": "payload.trenutno",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1060,
+        "y": 160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c6cadefb79cc0a9b",
+        "type": "websocket out",
+        "z": "033de1e496417ec1",
+        "name": "",
+        "server": "0f63c16d83355a50",
+        "client": "",
+        "x": 1180,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "5459d9ebe7a48331",
+        "type": "function",
+        "z": "033de1e496417ec1",
+        "name": "Fix: WS payload",
+        "func": "return {payload: msg.payload};",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1000,
+        "y": 100,
+        "wires": [
+            [
+                "c6cadefb79cc0a9b"
+            ]
+        ]
+    },
+    {
+        "id": "f944bdd943657205",
+        "type": "websocket-listener",
+        "path": "/ws/ura",
+        "wholemsg": "false"
+    },
+    {
+        "id": "0f63c16d83355a50",
+        "type": "websocket-listener",
+        "path": "/ws/publish",
+        "wholemsg": "false"
+    },
+    {
+        "id": "197be46cfd8e7b1a",
+        "type": "Cache",
+        "name": "Cache",
+        "defaultTtl": "",
+        "checkPeriod": ""
+    }
+]
