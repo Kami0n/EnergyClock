@@ -9,63 +9,78 @@ let sunset = 0;
 let diplayMinutes = false;
 let receivedMessage = '';
 let wedgeHours = null;
+let wedgeStart = null;
+let wedgeEnd = null;
 const zeroPad = (num, places) => String(num).padStart(places, '0')
 
+let socketNodeRed;
+function connect1() {
+	socketNodeRed = new WebSocket("ws://localhost:1880/ws/ura");
+	socketNodeRed.onopen = function(e) {
+		console.log("[WS open] connection established /ws/ura");
+	};
+	socketNodeRed.onclose = function(event) {
+		if (event.wasClean) {
+			console.log(`[WS close] connection closed cleanly, code=${event.code} reason=${event.reason}`);
+		} else {
+			// e.g. server process killed or network down
+			// event.code is usually 1006 in this case
+			console.log('[WS close] connection died');
+			connect1();
+		}
+	};
+	socketNodeRed.onerror = function(error) {
+		console.log(`[WS error] ${error.message}`);
+	};
+	socketNodeRed.onmessage = function(event) {
+		console.log(`[WS message] data received from server: ${event.data}`);
+		//receivedMessage = JSON.parse(event.data);
+	};
+}
+connect1();
 
-let socketNodeRed = new WebSocket("ws://localhost:1880/ws/ura");
-socketNodeRed.onopen = function(e) {
-	console.log("[WS open] connection established /ws/ura");
-};
-socketNodeRed.onclose = function(event) {
-	if (event.wasClean) {
-		console.log(`[WS close] connection closed cleanly, code=${event.code} reason=${event.reason}`);
-	} else {
-		// e.g. server process killed or network down
-		// event.code is usually 1006 in this case
-		console.log('[WS close] connection died');
-	}
-};
-socketNodeRed.onerror = function(error) {
-	console.log(`[WS error] ${error.message}`);
-};
-socketNodeRed.onmessage = function(event) {
-	console.log(`[WS message] data received from server: ${event.data}`);
-	//receivedMessage = JSON.parse(event.data);
-};
-
-//let socket = new WebSocket("ws://localhost:4001");
-let socketPublish = new WebSocket("ws://localhost:1880/ws/publish");
-socketPublish.onopen = function(e) {
-	console.log("[WS open] connection established /ws/publish");
-	socketNodeRed.send('{"request":true}');
-};
-socketPublish.onclose = function(event) {
-	if (event.wasClean) {
-		console.log(`[WS close] connection closed cleanly, code=${event.code} reason=${event.reason}`);
-	} else {
-		// e.g. server process killed or network down
-		// event.code is usually 1006 in this case
-		console.log('[WS close] connection died');
-	}
-};
-socketPublish.onerror = function(error) {
-	console.log(`[WS error] ${error.message}`);
-};
-socketPublish.onmessage = function(event) {
-	console.log(`[WS message] data received from server: ${event.data}`);
-	receivedMessage = JSON.parse(event.data);
-	
-	if(receivedMessage.isDay){
-		varDrawWedge = receivedMessage.isDay;
-		sunrise = timeToRadian(receivedMessage.results.sunrise);
-		sunset = timeToRadian(receivedMessage.results.sunset);
-	}
-	
-	if(receivedMessage.allHours){
-		wedgeHours = receivedMessage.allHours;
-	}
-	
-};
+let socketPublish;
+function connect2() {
+	socketPublish = new WebSocket("ws://localhost:1880/ws/publish");
+	socketPublish.onopen = function(e) {
+		console.log("[WS open] connection established /ws/publish");
+		socketNodeRed.send('{"request":true}');
+	};
+	socketPublish.onclose = function(event) {
+		if (event.wasClean) {
+			console.log(`[WS close] connection closed cleanly, code=${event.code} reason=${event.reason}`);
+		} else {
+			// e.g. server process killed or network down
+			// event.code is usually 1006 in this case
+			console.log('[WS close] connection died');
+			connect2();
+		}
+	};
+	socketPublish.onerror = function(error) {
+		console.log(`[WS error] ${error.message}`);
+	};
+	socketPublish.onmessage = function(event) {
+		console.log(`[WS message] data received from server: ${event.data}`);
+		receivedMessage = JSON.parse(event.data);
+		
+		if(receivedMessage.results){
+			varDrawWedge = receivedMessage.isDay;
+			sunrise = timeToRadian(receivedMessage.results.sunrise);
+			sunset = timeToRadian(receivedMessage.results.sunset);
+		}
+		
+		if(receivedMessage.allHours){
+			wedgeHours = receivedMessage.allHours;
+		}
+		
+		if(receivedMessage.start && receivedMessage.end){
+			wedgeStart = receivedMessage.start;
+			wedgeEnd = receivedMessage.end;
+		}
+		
+	};
+}
+connect2();
 
 function setup() {
 	createCanvas(windowWidth, windowHeight);
@@ -108,7 +123,8 @@ function draw() {
 	
 	// draw green wedge
 	
-	drawGreenHours()
+	//drawGreenHours()
+	drawGreenWedge()
 	/*
 	if(varDrawWedge){
 		drawWedge(cx, cy, "2022-04-23T11:00:00+00:00", "2022-04-23T19:00+00:00");
@@ -180,10 +196,10 @@ function draw() {
 	// Draw the hands of the clock
 	// Hours
 	stroke(33);
-	strokeWeight(8);
+	strokeWeight(2);
 	strokeCap(ROUND);
 	line(cx, cy, cx + cos(h) * hoursRadius, cy + sin(h) * hoursRadius);
-	strokeWeight(4);
+	strokeWeight(2);
 	fill("white");
 	ellipse(cx, cy, 20, 20);
 	
@@ -200,11 +216,22 @@ function draw() {
 	strokeWeight(2);
 	line(cx, cy, cx + cos(s) * secondsRadius, cy + sin(s) * secondsRadius);
 	*/
+	
+	
+	// if socket disconected
+	
+	if (socketNodeRed.readyState === WebSocket.CLOSED) {
+		// Do your stuff...
+		//console.log("socketNodeRed closed");
+	}
+	
+	//console.log(socketNodeRed);
+	//console.log(socketPublish);
 }
 
 function drawWedge(cx, cy, from, to, color){
-	console.log(from)
-	console.log(to)
+	//console.log(from)
+	//console.log(to)
 	/*if(color){
 		fill("#03c03c");
 	} else{
@@ -212,6 +239,9 @@ function drawWedge(cx, cy, from, to, color){
 	}*/
 	fill(color);
 	arc(cx, cy, wedgeRadius, wedgeRadius,timeToRadian(from), timeToRadian(to));
+	
+	
+	
 }
 
 function timeToRadian(time){
@@ -238,6 +268,12 @@ function drawGreenHours(){
 				drawWedge(cx, cy, "2022-04-23T"+zeroPad(i, 2)+":00:00+00:00", "2022-04-23T"+zeroPad(i+1, 2)+":01:00+00:00", ( i>hour()) ? "#03c03c" : "#edf5ef");
 			}
 		}
+	}
+}
+
+function drawGreenWedge(){
+	if( wedgeStart != null && wedgeEnd != null ){
+		drawWedge(cx, cy, wedgeStart, wedgeEnd, "#03c03c");
 	}
 }
 
