@@ -65,8 +65,8 @@ function connect2() {
 		
 		if(receivedMessage.results){
 			varDrawWedge = receivedMessage.isDay;
-			sunrise = timeToRadian(receivedMessage.results.sunrise);
-			sunset = timeToRadian(receivedMessage.results.sunset);
+			sunrise = timeToRadian(receivedMessage.results.sunrise, false);
+			sunset = timeToRadian(receivedMessage.results.sunset, false);
 		}
 		
 		if(receivedMessage.allHours){
@@ -87,12 +87,12 @@ function setup() {
 	stroke(255);
 	
 	let radius = min(width, height) / 2;
-	clockDiameter = radius * 1.7;
+	clockDiameter = radius * 1.95;
 	
 	// Oznake
 	ticksRadius = radius * 0.80;
-	minutesDisplayRadius = radius * 0.78;
-	hoursDisplayRadius = radius * 0.78;
+	minutesDisplayRadius = radius * 0.89;
+	hoursDisplayRadius = radius * 0.89;
 	
 	// Night/Day arch
 	nightDayRadius = hoursDisplayRadius * 2;
@@ -114,7 +114,7 @@ function draw() {
 	// Draw the clock background
 	noStroke();
 	fill(33);
-	ellipse(cx, cy, clockDiameter + 25, clockDiameter + 25);
+	ellipse(cx, cy, clockDiameter + 5, clockDiameter + 5);
 	fill("white");
 	ellipse(cx, cy, clockDiameter, clockDiameter);
 
@@ -122,14 +122,9 @@ function draw() {
 	drawArc(cx, cy, nightDayRadius, nightDayRadius, sunset, sunrise);
 	
 	// draw green wedge
-	
 	//drawGreenHours()
 	drawGreenWedge()
-	/*
-	if(varDrawWedge){
-		drawWedge(cx, cy, "2022-04-23T11:00:00+00:00", "2022-04-23T19:00+00:00");
-	}
-	*/
+	
 	// Angles for sin() and cos() start at horizontal right
 	// subtract HALF_PI to make them start at the top
 	const twopi = TWO_PI; // p5js throws error if TWO_PI is directly in map function....
@@ -195,6 +190,7 @@ function draw() {
 	
 	// Draw the hands of the clock
 	// Hours
+	strokeCap(ROUND);
 	stroke(33);
 	strokeWeight(2);
 	strokeCap(ROUND);
@@ -216,22 +212,9 @@ function draw() {
 	strokeWeight(2);
 	line(cx, cy, cx + cos(s) * secondsRadius, cy + sin(s) * secondsRadius);
 	*/
-	
-	
-	// if socket disconected
-	
-	if (socketNodeRed.readyState === WebSocket.CLOSED) {
-		// Do your stuff...
-		//console.log("socketNodeRed closed");
-	}
-	
-	//console.log(socketNodeRed);
-	//console.log(socketPublish);
 }
 
 function drawWedge(cx, cy, from, to, color){
-	//console.log(from)
-	//console.log(to)
 	/*if(color){
 		fill("#03c03c");
 	} else{
@@ -239,22 +222,25 @@ function drawWedge(cx, cy, from, to, color){
 	}*/
 	fill(color);
 	arc(cx, cy, wedgeRadius, wedgeRadius,timeToRadian(from), timeToRadian(to));
-	
-	
-	
 }
 
-function timeToRadian(time){
+function timeToRadian(time, utc = true){
 	let d = new Date(time);
-	let h = map(d.getUTCHours() + norm(d.getUTCMinutes(), 0, 60), 0, 24, 0, TWO_PI) - HALF_PI + PI;
+	let h;
+	if(utc){
+		h = map(d.getUTCHours() + norm(d.getUTCMinutes(), 0, 60), 0, 24, 0, TWO_PI) - HALF_PI + PI;
+	}else{
+		h = map(d.getHours() + norm(d.getMinutes(), 0, 60), 0, 24, 0, TWO_PI) - HALF_PI + PI;
+	}
+	
 	return h;
 }
 
 function drawArc(cx, cy, nightDayRadius, nightDayRadius, sunset, sunrise) {
 	noFill();
 	strokeWeight(50);
-	strokeCap(SQUARE);
-	stroke('#708090');
+	strokeCap(ROUND);
+	stroke('#d9d9d9');
 	arc(cx, cy, nightDayRadius, nightDayRadius, sunset, sunrise);
 	noStroke();
 }
@@ -276,4 +262,3 @@ function drawGreenWedge(){
 		drawWedge(cx, cy, wedgeStart, wedgeEnd, "#03c03c");
 	}
 }
-
