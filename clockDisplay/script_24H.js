@@ -84,17 +84,8 @@ connect2();
 
 function setup() {
 	createCanvas(windowWidth, windowHeight);
-	sizeItems();
-}
-
-function windowResized() {
-	console.log("Window resized");
-	resizeCanvas(windowWidth, windowHeight);
-	sizeItems();
-}
-
-function sizeItems(){
 	stroke(255);
+	
 	let radius = min(width, height) / 2;
 	clockDiameter = radius * 1.95;
 	
@@ -118,16 +109,15 @@ function sizeItems(){
 }
 
 function draw() {
-	background(150);
+	background(230);
 	
 	// Draw the clock background
 	noStroke();
-	fill(33);
-	ellipse(cx, cy, clockDiameter + 5, clockDiameter + 5);
-	fill("white");
+	fill(244, 122, 158);
+	ellipse(cx, cy, clockDiameter + 25, clockDiameter + 25);
+	fill(237, 34, 93);
 	ellipse(cx, cy, clockDiameter, clockDiameter);
 	
-	fill(33);
 	// Angles for sin() and cos() start at 3 o'clock;
 	// subtract HALF_PI to make them start at the top
 	let s = map(second(), 0, 60, 0, TWO_PI) - HALF_PI;
@@ -135,14 +125,12 @@ function draw() {
 	let h = map(hour() + norm(minute(), 0, 60), 0, 24, 0, TWO_PI * 2) - HALF_PI;
 	
 	// Draw the hands of the clock
-	stroke("red");
-	strokeWeight(2);
+	stroke(255);
+	strokeWeight(1);
 	line(cx, cy, cx + cos(s) * secondsRadius, cy + sin(s) * secondsRadius);
-	
-	stroke(33);
-	strokeWeight(4);
+	strokeWeight(2);
 	line(cx, cy, cx + cos(m) * minutesRadius, cy + sin(m) * minutesRadius);
-	strokeWeight(6);
+	strokeWeight(4);
 	line(cx, cy, cx + cos(h) * hoursRadius, cy + sin(h) * hoursRadius);
   
 	// Draw the minute ticks
@@ -152,40 +140,9 @@ function draw() {
 		let angle = radians(a);
 		let x = cx + cos(angle) * secondsRadius;
 		let y = cy + sin(angle) * secondsRadius;
-		//vertex(x, y);
+		vertex(x, y);
 	}
 	endShape();
-	
-	let displayHours = 0;
-	fill(33);
-	stroke(33);
-	// Hour numbers
-	textSize(30);
-	textAlign(CENTER, CENTER);
-	
-	for (let a = 0; a < 360; a += 6) {
-		let angle = radians(a);
-		let xh = cx + cos(angle-HALF_PI) * hoursDisplayRadius;
-		let yh = cy + sin(angle-HALF_PI) * hoursDisplayRadius;
-		
-		strokeWeight(0);
-		if(a % 90 == 0) {
-			if(a == 0){
-				text(12, xh, yh);
-				displayHours++
-			}else{
-				text(displayHours++, xh, yh);
-			}
-		} else if(a % 30 == 0) {
-			text(displayHours++, xh, yh);
-		} else {
-			strokeWeight(5);
-			beginShape(POINTS);
-			vertex(xh, yh);
-			endShape();
-		}
-	}
-	
 }
 
 function draw123() {

@@ -1,0 +1,620 @@
+[
+    {
+        "id": "21c3e506c52f24ee",
+        "type": "http request",
+        "z": "5dec35afcf7c3b36",
+        "name": "Sunrise/Sunset",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://api.sunrise-sunset.org/json?lat=45.8978927&lng=13.8607969&formatted=0",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 440,
+        "y": 40,
+        "wires": [
+            [
+                "84cef33c43143bd3"
+            ]
+        ]
+    },
+    {
+        "id": "84cef33c43143bd3",
+        "type": "json",
+        "z": "5dec35afcf7c3b36",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 590,
+        "y": 40,
+        "wires": [
+            [
+                "3d2223e5207c1f9a"
+            ]
+        ]
+    },
+    {
+        "id": "3d2223e5207c1f9a",
+        "type": "function",
+        "z": "5dec35afcf7c3b36",
+        "name": "Determine if day",
+        "func": "let sunrise = msg.payload.results.sunrise;\nsunrise = new Date(sunrise);\nmsg.payload.sunrise = sunrise.getHours();\n\nlet sunset = msg.payload.results.sunset;\nsunset = new Date(sunset);\nmsg.payload.sunset = sunset.getHours();\n\nlet trenutno = new Date();\n// machinations for time zone...\ntrenutno = trenutno - (trenutno.getTimezoneOffset() * 60000);\ntrenutno = new Date(trenutno);\nmsg.payload.trenutno = trenutno;\n\nif( sunrise < trenutno && trenutno < sunset ){\n    msg.payload.isDay = true;\n}\nelse{\n    msg.payload.isDay = false;\n}\n\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 740,
+        "y": 40,
+        "wires": [
+            [
+                "23f2e9fcaa8634ee"
+            ]
+        ]
+    },
+    {
+        "id": "23f2e9fcaa8634ee",
+        "type": "function",
+        "z": "5dec35afcf7c3b36",
+        "name": "Fix: WS payload",
+        "func": "return {payload: msg.payload};",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 920,
+        "y": 40,
+        "wires": [
+            [
+                "33813480cf3bf581"
+            ]
+        ]
+    },
+    {
+        "id": "33813480cf3bf581",
+        "type": "websocket out",
+        "z": "5dec35afcf7c3b36",
+        "name": "",
+        "server": "0f63c16d83355a50",
+        "client": "",
+        "x": 1120,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "aadca1d85373af87",
+        "type": "function",
+        "z": "5dec35afcf7c3b36",
+        "name": "Check request",
+        "func": "if(msg.payload){\n    const mssg = JSON.parse(msg.payload);\n    if(mssg.request === true){\n        console.log('true');\n        msg.payload = Date.now();\n        msg.topic = 'timestamp';\n    }\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 260,
+        "y": 40,
+        "wires": [
+            [
+                "21c3e506c52f24ee"
+            ]
+        ]
+    },
+    {
+        "id": "0726f0199bc44cc6",
+        "type": "websocket in",
+        "z": "5dec35afcf7c3b36",
+        "name": "",
+        "server": "f944bdd943657205",
+        "client": "",
+        "x": 90,
+        "y": 40,
+        "wires": [
+            [
+                "aadca1d85373af87"
+            ]
+        ]
+    },
+    {
+        "id": "5d311dd251427543",
+        "type": "inject",
+        "z": "5dec35afcf7c3b36",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 160,
+        "y": 640,
+        "wires": [
+            [
+                "75aedcb11232ecac"
+            ]
+        ]
+    },
+    {
+        "id": "49a871e13d2db5d9",
+        "type": "debug",
+        "z": "5dec35afcf7c3b36",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1230,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "4b0364eeba543baf",
+        "type": "mqtt in",
+        "z": "5dec35afcf7c3b36",
+        "name": "",
+        "topic": "WaM",
+        "qos": "2",
+        "datatype": "auto",
+        "broker": "8a577b280844c7a3",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "x": 90,
+        "y": 180,
+        "wires": [
+            [
+                "b5b944deb10e769e"
+            ]
+        ]
+    },
+    {
+        "id": "d8065a16f1c85633",
+        "type": "mqtt out",
+        "z": "5dec35afcf7c3b36",
+        "name": "",
+        "topic": "WaM",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8a577b280844c7a3",
+        "x": 480,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "75aedcb11232ecac",
+        "type": "change",
+        "z": "5dec35afcf7c3b36",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "1",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 320,
+        "y": 640,
+        "wires": [
+            [
+                "d8065a16f1c85633"
+            ]
+        ]
+    },
+    {
+        "id": "b5b944deb10e769e",
+        "type": "switch",
+        "z": "5dec35afcf7c3b36",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "2",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 240,
+        "y": 180,
+        "wires": [
+            [
+                "4ef68383537a836d"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "60ed4c1dd41abc0f",
+        "type": "comment",
+        "z": "5dec35afcf7c3b36",
+        "name": "\"1\" -> washing machine",
+        "info": "",
+        "x": 480,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "4e8f2d5d7f69a52b",
+        "type": "comment",
+        "z": "5dec35afcf7c3b36",
+        "name": "\"2\" -> electric car",
+        "info": "",
+        "x": 460,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "217f55e0f4f5b938",
+        "type": "websocket out",
+        "z": "5dec35afcf7c3b36",
+        "name": "",
+        "server": "0f63c16d83355a50",
+        "client": "",
+        "x": 960,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "5d88cc5c19c3a47b",
+        "type": "function",
+        "z": "5dec35afcf7c3b36",
+        "name": "Fix: WS payload",
+        "func": "return {payload: msg.payload};",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 780,
+        "y": 140,
+        "wires": [
+            [
+                "217f55e0f4f5b938",
+                "01f2c1e9d8633240"
+            ]
+        ]
+    },
+    {
+        "id": "4ef68383537a836d",
+        "type": "function",
+        "z": "5dec35afcf7c3b36",
+        "name": "Determine Green",
+        "func": "\nlet trenutno = new Date();\n// machinations for time zone...\ntrenutno = trenutno - (trenutno.getTimezoneOffset() * 60000);\ntrenutno = new Date(trenutno);\n\nconst diff = 1; // 3 min after click is green\nlet startWedge = new Date(trenutno.getTime() + diff*60000);\n\nconst diff2 = 125; // 125 min after start of green it ends\nlet endWedge = new Date(startWedge.getTime() + diff2*60000);\n\nflow.set(\"startWedge\",startWedge);\nflow.set(\"endWedge\",endWedge);\nflow.set(\"blocking\", false);\n\nmsg.payload =  {\"start\": startWedge, \"end\": endWedge, \"trenutno\": trenutno};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 470,
+        "y": 140,
+        "wires": [
+            [
+                "a701b1350b938701"
+            ]
+        ]
+    },
+    {
+        "id": "a701b1350b938701",
+        "type": "json",
+        "z": "5dec35afcf7c3b36",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 630,
+        "y": 140,
+        "wires": [
+            [
+                "5d88cc5c19c3a47b"
+            ]
+        ]
+    },
+    {
+        "id": "30393595b38e701d",
+        "type": "inject",
+        "z": "5dec35afcf7c3b36",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "10",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 380,
+        "wires": [
+            [
+                "c1e35392.abf13"
+            ]
+        ]
+    },
+    {
+        "id": "221839c29a88d752",
+        "type": "function",
+        "z": "5dec35afcf7c3b36",
+        "name": "Determine if in wedge",
+        "func": "let trenutno = new Date();\n// machinations for time zone...\ntrenutno = trenutno - (trenutno.getTimezoneOffset() * 60000);\ntrenutno = new Date(trenutno);\n\nconst startWedge = flow.get(\"startWedge\");\nconst endWedge = flow.get(\"endWedge\");\n\nif(trenutno > startWedge ){\n   flow.set(\"blocking\",true);\n   msg.payload = true;\n   \n   return msg;\n}\n\nflow.set(\"blocking\",false);\nreturn null; // halt flow",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 380,
+        "wires": [
+            [
+                "7f753342b451eb87",
+                "143783de9dcfaa67",
+                "cfb4fbb987140e71"
+            ]
+        ]
+    },
+    {
+        "id": "01f2c1e9d8633240",
+        "type": "debug",
+        "z": "5dec35afcf7c3b36",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 950,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "c1e35392.abf13",
+        "type": "function",
+        "z": "5dec35afcf7c3b36",
+        "name": "gate",
+        "func": "var block = context.get(\"block\") || false;\n\nvar blocking = flow.get(\"blocking\");\nconsole.log(\"blocking: \"+blocking);\n\nif (blocking != undefined) {\n    block = blocking;\n    context.set(\"block\", block);\n    var stat = {\n        fill: block ? \"red\" : \"green\",\n        shape: \"dot\",\n        text: block ? \"Blocked\" : \"Unblocked\"\n    }\n    node.status(stat)\n}else{\n    var stat = {\n        fill: \"yellow\",\n        shape: \"dot\",\n        text: \"Undefined\"\n    }\n    node.status(stat)\n}\n\nif(block) return null; //halt flow\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 310,
+        "y": 380,
+        "wires": [
+            [
+                "221839c29a88d752"
+            ]
+        ]
+    },
+    {
+        "id": "7f753342b451eb87",
+        "type": "delay",
+        "z": "5dec35afcf7c3b36",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "2",
+        "timeoutUnits": "minutes",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "x": 740,
+        "y": 400,
+        "wires": [
+            [
+                "22ef4d41615cab6f"
+            ]
+        ]
+    },
+    {
+        "id": "143783de9dcfaa67",
+        "type": "delay",
+        "z": "5dec35afcf7c3b36",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "5",
+        "timeoutUnits": "minutes",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "x": 740,
+        "y": 440,
+        "wires": [
+            [
+                "dac2ba14a044a693"
+            ]
+        ]
+    },
+    {
+        "id": "0ed1b7ecc3050ef8",
+        "type": "mqtt out",
+        "z": "5dec35afcf7c3b36",
+        "name": "",
+        "topic": "WaMnotify",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8a577b280844c7a3",
+        "x": 1230,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "cfb4fbb987140e71",
+        "type": "change",
+        "z": "5dec35afcf7c3b36",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "1",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 960,
+        "y": 360,
+        "wires": [
+            [
+                "0ed1b7ecc3050ef8",
+                "49a871e13d2db5d9"
+            ]
+        ]
+    },
+    {
+        "id": "22ef4d41615cab6f",
+        "type": "change",
+        "z": "5dec35afcf7c3b36",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "2",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 960,
+        "y": 400,
+        "wires": [
+            [
+                "0ed1b7ecc3050ef8",
+                "49a871e13d2db5d9"
+            ]
+        ]
+    },
+    {
+        "id": "dac2ba14a044a693",
+        "type": "change",
+        "z": "5dec35afcf7c3b36",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "3",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 960,
+        "y": 440,
+        "wires": [
+            [
+                "0ed1b7ecc3050ef8",
+                "49a871e13d2db5d9"
+            ]
+        ]
+    },
+    {
+        "id": "0f63c16d83355a50",
+        "type": "websocket-listener",
+        "path": "/ws/publish",
+        "wholemsg": "false"
+    },
+    {
+        "id": "f944bdd943657205",
+        "type": "websocket-listener",
+        "path": "/ws/ura",
+        "wholemsg": "false"
+    },
+    {
+        "id": "8a577b280844c7a3",
+        "type": "mqtt-broker",
+        "name": "Lucami MQTT",
+        "broker": "rlab.lucami.org",
+        "port": "1883",
+        "clientid": "",
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "sessionExpiry": ""
+    }
+]
