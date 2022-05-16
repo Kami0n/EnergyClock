@@ -108,10 +108,9 @@ function sizeItems(){
 	wedgeRadius = hoursDisplayRadius * 1.85;
 	
 	// Kazalci
-	secondsRadius = radius * 0.78;
-	minutesRadius = radius * 0.75;
-	//hoursRadius = radius * 0.6;
-	hoursRadius = hoursDisplayRadius * .95;
+	secondsRadius = radius * 0.9;
+	minutesRadius = radius * 0.8
+	hoursRadius = radius * 0.7;
 	
 	cx = width / 2;
 	cy = height / 2;
@@ -134,17 +133,8 @@ function draw() {
 	let m = map(minute() + norm(second(), 0, 60), 0, 60, 0, TWO_PI) - HALF_PI;
 	let h = map(hour() + norm(minute(), 0, 60), 0, 24, 0, TWO_PI * 2) - HALF_PI;
 	
-	// Draw the hands of the clock
-	stroke("red");
-	strokeWeight(2);
-	line(cx, cy, cx + cos(s) * secondsRadius, cy + sin(s) * secondsRadius);
 	
-	stroke(33);
-	strokeWeight(4);
-	line(cx, cy, cx + cos(m) * minutesRadius, cy + sin(m) * minutesRadius);
-	strokeWeight(6);
-	line(cx, cy, cx + cos(h) * hoursRadius, cy + sin(h) * hoursRadius);
-  
+	
 	// Draw the minute ticks
 	strokeWeight(2);
 	beginShape(POINTS);
@@ -186,9 +176,24 @@ function draw() {
 		}
 	}
 	
+	// Draw the hands of the clock
+	ellipse(cx, cy, 20, 20);
+	strokeWeight(6);
+	line(cx, cy, cx + cos(h) * hoursRadius, cy + sin(h) * hoursRadius);
+	stroke(33);
+	strokeWeight(4);
+	line(cx, cy, cx + cos(m) * minutesRadius, cy + sin(m) * minutesRadius);
+	
+	
+	stroke("red");
+	strokeWeight(2);
+	line(cx, cy, cx + cos(s) * secondsRadius, cy + sin(s) * secondsRadius);
+	fill("red");
+	ellipse(cx, cy, 15, 15);
+	
 }
 
-function draw123() {
+function drawOld() {
 	background(255);
 	
 	// Draw the clock background
