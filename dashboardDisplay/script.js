@@ -471,40 +471,51 @@ function izberi(id) {
 	console.log(id);
 	if (id === "washing"){
 		object = pomivalni_stroj;
-		pomivalni_stroj.active=true;
+		pomivalni_stroj.active= !pomivalni_stroj.active;
 	}
 	else if (id === "car"){
 		object = car;
-		car.active=true;
+		car.active= !car.active;
 	}
 	else if (id === "conditioning"){
 		object = conditioning;
-		conditioning.active=true;
+		conditioning.active= !conditioning.active;
 	}
 	else if (id === "dryer"){
 		object = dryer;
-		dryer.active = true;
+		dryer.active = !dryer.active;
 	}
 	else if (id === "heater"){
 		object = heater;
-		heater.active=true;
+		heater.active= !heater.active;
 
 	}
 	else if (id === "light"){
 		object = light;
-		light.active=true;
+		light.active= !light.active;
 	}
 	else if (id === "romba"){
 		object = romba;
-		romba.active = true;
+		romba.active = !romba.active;
 	}
 	else {
-		console.log("WTF WTF");
+		alert("cant find the reffered object with the name "+id)
 		return;
 	}
-	document.getElementById(id+"_wop").removeAttribute("hidden");
-	document.getElementById(id).style.opacity="0.3";
-	razpolozljivo = razpolozljivo - object.poraba;
+	if(object.active){
+		document.getElementById(id+"_wop").removeAttribute("hidden");
+		document.getElementById(id).style.opacity="0.3";
+		razpolozljivo = razpolozljivo - object.poraba;
+	}
+	else if(!object.active){
+		document.getElementById(id).style.opacity="1";
+		document.getElementById(id+"_wop").setAttribute("hidden","hidden");
+		razpolozljivo = razpolozljivo + object.poraba;
+	}
+	else{
+		alert("error");
+	}
+
 	console.log("PORABAAAA: " +razpolozljivo);
 	pobarvaj()
 }
