@@ -12,6 +12,8 @@ let wedgeHours = null;
 let wedgeStart = null;
 let wedgeEnd = null;
 const zeroPad = (num, places) => String(num).padStart(places, '0')
+let sizeScreen = 1;
+let width, height;
 
 let socketNodeRed;
 function connect1() {
@@ -83,17 +85,28 @@ function connect2() {
 connect2();
 
 function setup() {
-	createCanvas(windowWidth, windowHeight);
+	width = windowWidth;
+	height = windowHeight;
+	createCanvas(width, height);
 	sizeItems();
 }
 
 function windowResized() {
 	console.log("Window resized");
-	resizeCanvas(windowWidth, windowHeight);
+	width = windowWidth;
+	height = windowHeight;
+	resizeCanvas(width, height);
 	sizeItems();
 }
 
 function sizeItems(){
+	
+	if(windowHeight > windowWidth ){
+		sizeScreen = windowWidth / 1000;
+	}else{
+		sizeScreen = windowHeight / 1000;
+	}
+	
 	stroke(255);
 	let radius = min(width, height) / 2;
 	clockDiameter = radius * 1.95;
@@ -117,6 +130,7 @@ function sizeItems(){
 }
 
 function draw() {
+
 	clear();
 	background(150);
 	
@@ -137,7 +151,7 @@ function draw() {
 	
 	
 	// Draw the minute ticks
-	strokeWeight(2);
+	strokeWeight(2*sizeScreen);
 	beginShape(POINTS);
 	for (let a = 0; a < 360; a += 6) {
 		let angle = radians(a);
@@ -151,10 +165,10 @@ function draw() {
 	fill(33);
 	stroke(33);
 	// Hour numbers
-	textSize(50);
+	textSize(60*sizeScreen);
 	textFont('Koulen');
 	textAlign(CENTER, CENTER);
-	let KoulenOffset = 5;
+	let KoulenOffset = 12*sizeScreen;
 	
 	for (let a = 0; a < 360; a += 6) {
 		let angle = radians(a);
@@ -172,7 +186,7 @@ function draw() {
 		} else if(a % 30 == 0) {
 			text(displayHours++, xh, yh);
 		} else {
-			strokeWeight(5);
+			strokeWeight(5*sizeScreen);
 			beginShape(POINTS);
 			vertex(xh, yh);
 			endShape();
@@ -180,19 +194,19 @@ function draw() {
 	}
 	
 	// Draw the hands of the clock
-	ellipse(cx, cy, 20, 20);
-	strokeWeight(6);
+	ellipse(cx, cy, 20*sizeScreen, 20*sizeScreen);
+	strokeWeight(6*sizeScreen);
 	line(cx, cy, cx + cos(h) * hoursRadius, cy + sin(h) * hoursRadius);
 	stroke(33);
-	strokeWeight(4);
+	strokeWeight(4*sizeScreen);
 	line(cx, cy, cx + cos(m) * minutesRadius, cy + sin(m) * minutesRadius);
 	
 	
 	stroke("red");
-	strokeWeight(2);
+	strokeWeight(2*sizeScreen);
 	line(cx, cy, cx + cos(s) * secondsRadius, cy + sin(s) * secondsRadius);
 	fill("red");
-	ellipse(cx, cy, 15, 15);
+	ellipse(cx, cy, 15*sizeScreen, 15*sizeScreen);
 	
 }
 
