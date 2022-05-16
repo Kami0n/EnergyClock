@@ -117,6 +117,7 @@ function sizeItems(){
 }
 
 function draw() {
+	clear();
 	background(150);
 	
 	// Draw the clock background
@@ -150,8 +151,10 @@ function draw() {
 	fill(33);
 	stroke(33);
 	// Hour numbers
-	textSize(30);
+	textSize(50);
+	textFont('Koulen');
 	textAlign(CENTER, CENTER);
+	let KoulenOffset = 5;
 	
 	for (let a = 0; a < 360; a += 6) {
 		let angle = radians(a);
@@ -161,10 +164,10 @@ function draw() {
 		strokeWeight(0);
 		if(a % 90 == 0) {
 			if(a == 0){
-				text(12, xh, yh);
+				text(12, xh, yh+KoulenOffset);
 				displayHours++
 			}else{
-				text(displayHours++, xh, yh);
+				text(displayHours++, xh, yh+KoulenOffset);
 			}
 		} else if(a % 30 == 0) {
 			text(displayHours++, xh, yh);
