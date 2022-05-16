@@ -141,6 +141,12 @@ function draw() {
 	fill("white");
 	ellipse(cx, cy, clockDiameter, clockDiameter);
 	
+	
+	
+	drawGreenWedge();
+	
+	
+	
 	fill(33);
 	// Angles for sin() and cos() start at 3 o'clock;
 	// subtract HALF_PI to make them start at the top
@@ -208,6 +214,65 @@ function draw() {
 	fill("red");
 	ellipse(cx, cy, 15*sizeScreen, 15*sizeScreen);
 	
+}
+
+function drawWedge(cx, cy, from, to, color){
+	fill(color);
+	arc(cx, cy, wedgeRadius, wedgeRadius,timeToRadian(from), timeToRadian(to));
+}
+
+function drawGreenWedge(){
+	if( wedgeStart != null && wedgeEnd != null ){
+		drawWedge(cx, cy, wedgeStart, wedgeEnd, "#03c03c");
+	}
+}
+
+function timeToRadian(time, utc = true, clockType=12){
+	let d = new Date(time);
+	let h;
+	if(clockType == 24){
+		if(utc){
+			h = map(d.getUTCHours() + norm(d.getUTCMinutes(), 0, 60), 0, clockType, 0, TWO_PI) - HALF_PI + PI;
+		}else{
+			h = map(d.getHours() + norm(d.getMinutes(), 0, 60), 0, clockType, 0, TWO_PI) - HALF_PI + PI;
+		}
+	}
+	else if(clockType == 12){
+		if(utc){
+			h = map(d.getUTCHours() + norm(d.getUTCMinutes(), 0, 60), 0, clockType, 0, TWO_PI) - HALF_PI;
+		}else{
+			h = map(d.getHours() + norm(d.getMinutes(), 0, 60), 0, clockType, 0, TWO_PI) - HALF_PI ;
+		}
+	}
+	return h;
+}
+
+function drawArc(cx, cy, nightDayRadius, nightDayRadius, sunset, sunrise) {
+	noFill();
+	strokeWeight(50);
+	strokeCap(ROUND);
+	stroke('#d9d9d9');
+	arc(cx, cy, nightDayRadius, nightDayRadius, sunset, sunrise);
+	noStroke();
+}
+
+
+
+
+
+
+
+
+function drawGreenHours(){
+	if(wedgeHours != null){
+		//const start = hour();
+		const start = 0;
+		for (let i = start; i < 24; i++) {
+			if(wedgeHours[i]){
+				drawWedge(cx, cy, "2022-04-23T"+zeroPad(i, 2)+":00:00+00:00", "2022-04-23T"+zeroPad(i+1, 2)+":01:00+00:00", ( i>hour()) ? "#03c03c" : "#edf5ef");
+			}
+		}
+	}
 }
 
 function drawOld() {
@@ -314,53 +379,4 @@ function drawOld() {
 	strokeWeight(2);
 	line(cx, cy, cx + cos(s) * secondsRadius, cy + sin(s) * secondsRadius);
 	*/
-}
-
-function drawWedge(cx, cy, from, to, color){
-	/*if(color){
-		fill("#03c03c");
-	} else{
-		fill("#b1fec8");
-	}*/
-	fill(color);
-	arc(cx, cy, wedgeRadius, wedgeRadius,timeToRadian(from), timeToRadian(to));
-}
-
-function timeToRadian(time, utc = true){
-	let d = new Date(time);
-	let h;
-	if(utc){
-		h = map(d.getUTCHours() + norm(d.getUTCMinutes(), 0, 60), 0, 24, 0, TWO_PI) - HALF_PI + PI;
-	}else{
-		h = map(d.getHours() + norm(d.getMinutes(), 0, 60), 0, 24, 0, TWO_PI) - HALF_PI + PI;
-	}
-	
-	return h;
-}
-
-function drawArc(cx, cy, nightDayRadius, nightDayRadius, sunset, sunrise) {
-	noFill();
-	strokeWeight(50);
-	strokeCap(ROUND);
-	stroke('#d9d9d9');
-	arc(cx, cy, nightDayRadius, nightDayRadius, sunset, sunrise);
-	noStroke();
-}
-
-function drawGreenHours(){
-	if(wedgeHours != null){
-		//const start = hour();
-		const start = 0;
-		for (let i = start; i < 24; i++) {
-			if(wedgeHours[i]){
-				drawWedge(cx, cy, "2022-04-23T"+zeroPad(i, 2)+":00:00+00:00", "2022-04-23T"+zeroPad(i+1, 2)+":01:00+00:00", ( i>hour()) ? "#03c03c" : "#edf5ef");
-			}
-		}
-	}
-}
-
-function drawGreenWedge(){
-	if( wedgeStart != null && wedgeEnd != null ){
-		drawWedge(cx, cy, wedgeStart, wedgeEnd, "#03c03c");
-	}
 }
