@@ -64,9 +64,7 @@ function connect2() {
 	socketPublish.onmessage = function(event) {
 		console.log(`[WS message] data received from server: ${event.data}`);
 		receivedMessage = JSON.parse(event.data);
-		if(receivedMessage.type){
-			izberi(receivedMessage.type);
-		}
+
 		if(receivedMessage.results){
 			varDrawWedge = receivedMessage.isDay;
 			sunrise = timeToRadian(receivedMessage.results.sunrise, false);
@@ -382,12 +380,44 @@ function drawOld() {
 	line(cx, cy, cx + cos(s) * secondsRadius, cy + sin(s) * secondsRadius);
 	*/
 }
+//-----------------------------
+let socketSlika;
+function connect3() {
+	socketPublish = new WebSocket("ws://localhost:1880/ws/slika");
+	socketPublish.onopen = function(e) {
+		console.log("[WS open] connection established /ws/slika");
+		socketNodeRed.send('{"request":true}');
+	};
+	socketPublish.onclose = function(event) {
+		if (event.wasClean) {
+			console.log(`[WS close] connection closed cleanly, code=${event.code} reason=${event.reason}`);
+		} else {
+			// e.g. server process killed or network down
+			// event.code is usually 1006 in this case
+			console.log('[WS close] connection died');
+			connect2();
+		}
+	};
+	socketPublish.onerror = function(error) {
+		console.log(`[WS error] ${error.message}`);
+	};
+	socketPublish.onmessage = function(event) {
+		console.log(`[WS message] data received from server: ${event.data}`);
+		receivedMessage = JSON.parse(event.data);
 
-var razpolozljivo = 50;
+		if(receivedMessage.id){
+			izberi(receivedMessage.id);
+		}
+	};
+}
+connect3();
+
+
+var razpolozljivo = 70;
 
 let pomivalni_stroj = {
 	active:false,
-	poraba:50,
+	poraba:10,
 	slikaActive:"images/stroj_ready.png",
 	slikaInactive:"images/stroj_unready.png",
 	element:  "washing",
@@ -412,7 +442,7 @@ let dryer = {
 };
 let heater = {
 	active:false,
-	poraba:70,
+	poraba:20,
 	slikaActive:"images/heater_ready.png",
 	slikaInactive:"images/heater_unready.png",
 	element: "heater",
@@ -428,7 +458,7 @@ let light = {
 };
 let car = {
 	active:false,
-	poraba:20,
+	poraba:50,
 	slikaActive:"images/car_ready.png",
 	slikaInactive:"images/car_unready.png",
 	element: "car",
@@ -436,7 +466,7 @@ let car = {
 };
 let romba = {
 	active:false,
-	poraba:20,
+	poraba:5,
 	slikaActive:"images/romba_ready.png",
 	slikaInactive:"images/romba_unready.png",
 	element: "romba",
@@ -452,9 +482,9 @@ let seznamnaprav = [
 	romba
 ];
 function pobarvaj() {
+	console.log("barvam");
 	seznamnaprav.forEach(element => {
 		if(element.active === false){
-
 			if (element.poraba <= razpolozljivo){
 				document.getElementById(element.slikaCurrent).src = element.slikaActive;
 			}
@@ -465,11 +495,11 @@ function pobarvaj() {
 		}
 	})
 }
-
 function izberi(id) {
+	console.log("izbiram");
 	let object = null;
-	console.log(id);
-	if (id === "washing"){
+	if (id === "washing machine"){
+		id = "washing";
 		object = pomivalni_stroj;
 		pomivalni_stroj.active= !pomivalni_stroj.active;
 	}
@@ -485,7 +515,8 @@ function izberi(id) {
 		object = dryer;
 		dryer.active = !dryer.active;
 	}
-	else if (id === "heater"){
+	else if (id === "heating"){
+		id="heater";
 		object = heater;
 		heater.active= !heater.active;
 
@@ -494,7 +525,8 @@ function izberi(id) {
 		object = light;
 		light.active= !light.active;
 	}
-	else if (id === "romba"){
+	else if (id === "rumba"){
+		id = "romba";
 		object = romba;
 		romba.active = !romba.active;
 	}
@@ -506,16 +538,22 @@ function izberi(id) {
 		document.getElementById(id+"_wop").removeAttribute("hidden");
 		document.getElementById(id).style.opacity="0.3";
 		razpolozljivo = razpolozljivo - object.poraba;
+		pobarvaj()
 	}
 	else if(!object.active){
 		document.getElementById(id).style.opacity="1";
 		document.getElementById(id+"_wop").setAttribute("hidden","hidden");
 		razpolozljivo = razpolozljivo + object.poraba;
+		pobarvaj()
 	}
 	else{
 		alert("error");
 	}
 
 	console.log("PORABAAAA: " +razpolozljivo);
-	pobarvaj()
+
+	//window.onload = pobarvaj();
+	window.addEventListener("load", function(){
+		izberi("heating");
+	});
 }
