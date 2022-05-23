@@ -13,7 +13,7 @@ let wedgeStart = null;
 let wedgeEnd = null;
 const zeroPad = (num, places) => String(num).padStart(places, '0')
 let sizeScreen = 1;
-let width, height;
+let winWidth = 500, winHeight = 500;
 
 let socketNodeRed;
 function connect1() {
@@ -70,61 +70,68 @@ function connect2() {
 			sunrise = timeToRadian(receivedMessage.results.sunrise, false);
 			sunset = timeToRadian(receivedMessage.results.sunset, false);
 		}
-		
+
 		if(receivedMessage.allHours){
 			wedgeHours = receivedMessage.allHours;
 		}
-		
+
 		if(receivedMessage.start && receivedMessage.end){
 			wedgeStart = receivedMessage.start;
 			wedgeEnd = receivedMessage.end;
 		}
-		
+
+		if(receivedMessage.clear){
+			wedgeHours = null;
+			wedgeStart = null;
+			wedgeEnd = null;
+			varDrawWedge = false;
+		}
+
 	};
 }
 connect2();
 
 function setup() {
-	width = 700;
-	height = 700;
-	createCanvas(width, height);
+	//winWidth = windowWidth;
+	//winHeight = windowHeight;
+	createCanvas(winWidth, winHeight);
 	sizeItems();
 }
 
 function windowResized() {
 	console.log("Window resized");
-	width = windowWidth;
-	height = windowHeight;
-	resizeCanvas(width, height);
+	//winWidth = windowWidth;
+	//winHeight = windowHeight;
+	resizeCanvas(winWidth, winHeight);
 	sizeItems();
 }
 
 function sizeItems(){
-	
-	if(windowHeight > windowWidth ){
-		sizeScreen = windowWidth / 1000;
+
+	if(height > width ){
+		sizeScreen = width / 1000;
 	}else{
-		sizeScreen = windowHeight / 1000;
+		sizeScreen = height / 1000;
 	}
-	
+
 	stroke(255);
 	let radius = min(width, height) / 2;
 	clockDiameter = radius * 1.95;
-	
+
 	// Oznake
 	ticksRadius = radius * 0.80;
 	minutesDisplayRadius = radius * 0.89;
 	hoursDisplayRadius = radius * 0.89;
-	
+
 	// Night/Day arch
 	nightDayRadius = hoursDisplayRadius * 2;
 	wedgeRadius = hoursDisplayRadius * 1.85;
-	
+
 	// Kazalci
 	secondsRadius = radius * 0.9;
 	minutesRadius = radius * 0.8
 	hoursRadius = radius * 0.7;
-	
+
 	cx = width / 2;
 	cy = height / 2;
 }
@@ -132,30 +139,30 @@ function sizeItems(){
 function draw() {
 
 	clear();
-	background(150);
-	
+	background(255);
+
 	// Draw the clock background
 	noStroke();
 	fill(33);
 	ellipse(cx, cy, clockDiameter + 5, clockDiameter + 5);
 	fill("white");
 	ellipse(cx, cy, clockDiameter, clockDiameter);
-	
-	
-	
+
+
+
 	drawGreenWedge();
-	
-	
-	
+
+
+
 	fill(33);
 	// Angles for sin() and cos() start at 3 o'clock;
 	// subtract HALF_PI to make them start at the top
 	let s = map(second(), 0, 60, 0, TWO_PI) - HALF_PI;
 	let m = map(minute() + norm(second(), 0, 60), 0, 60, 0, TWO_PI) - HALF_PI;
 	let h = map(hour() + norm(minute(), 0, 60), 0, 24, 0, TWO_PI * 2) - HALF_PI;
-	
-	
-	
+
+
+
 	// Draw the minute ticks
 	strokeWeight(2*sizeScreen);
 	beginShape(POINTS);
@@ -166,7 +173,7 @@ function draw() {
 		//vertex(x, y);
 	}
 	endShape();
-	
+
 	let displayHours = 0;
 	fill(33);
 	stroke(33);
@@ -175,12 +182,12 @@ function draw() {
 	textFont('Koulen');
 	textAlign(CENTER, CENTER);
 	let KoulenOffset = 12*sizeScreen;
-	
+
 	for (let a = 0; a < 360; a += 6) {
 		let angle = radians(a);
 		let xh = cx + cos(angle-HALF_PI) * hoursDisplayRadius;
 		let yh = cy + sin(angle-HALF_PI) * hoursDisplayRadius;
-		
+
 		strokeWeight(0);
 		if(a % 90 == 0) {
 			if(a == 0){
@@ -198,7 +205,7 @@ function draw() {
 			endShape();
 		}
 	}
-	
+
 	// Draw the hands of the clock
 	ellipse(cx, cy, 20*sizeScreen, 20*sizeScreen);
 	strokeWeight(6*sizeScreen);
@@ -206,14 +213,14 @@ function draw() {
 	stroke(33);
 	strokeWeight(4*sizeScreen);
 	line(cx, cy, cx + cos(m) * minutesRadius, cy + sin(m) * minutesRadius);
-	
-	
+
+
 	stroke("red");
 	strokeWeight(2*sizeScreen);
 	line(cx, cy, cx + cos(s) * secondsRadius, cy + sin(s) * secondsRadius);
 	fill("red");
 	ellipse(cx, cy, 15*sizeScreen, 15*sizeScreen);
-	
+
 }
 
 function drawWedge(cx, cy, from, to, color){
@@ -277,7 +284,7 @@ function drawGreenHours(){
 
 function drawOld() {
 	background(255);
-	
+
 	// Draw the clock background
 	noStroke();
 	fill(33);
@@ -287,11 +294,11 @@ function drawOld() {
 
 	// draw night/day
 	drawArc(cx, cy, nightDayRadius, nightDayRadius, sunset, sunrise);
-	
+
 	// draw green wedge
 	//drawGreenHours()
 	drawGreenWedge()
-	
+
 	// Angles for sin() and cos() start at horizontal right
 	// subtract HALF_PI to make them start at the top
 	const twopi = TWO_PI; // p5js throws error if TWO_PI is directly in map function....
@@ -300,20 +307,20 @@ function drawOld() {
 		let m = map(minute() + norm(second(), 0, 60), 0, 60, 0, twopi) - HALF_PI;
 	}
 	let h = map(hour() + norm(minute(), 0, 60), 0, 24, 0, twopi) - HALF_PI + PI;
-	
+
 	//stroke(33);
 	// Draw the ticks
 	let displayMinutes = 0;
 	let displayHours = 0;
 	fill(0, 0, 0);
 	textAlign(CENTER, CENTER);
-	
+
 	// Minute numbers
 	if(diplayMinutes){
 		textSize(16);
 		for (let a = 0; a < 360; a += 6) {
 			let angle = radians(a);
-			
+
 			/*
 			if(a % 90 == 0) {
 				strokeWeight(30);
@@ -331,7 +338,7 @@ function drawOld() {
 			*/
 			let xm = cx + cos(angle-HALF_PI) * minutesDisplayRadius;
 			let ym = cy + sin(angle-HALF_PI) * minutesDisplayRadius;
-			
+
 			if(a % 30 == 0) {
 				text(displayMinutes, xm, ym);
 			}
@@ -349,12 +356,12 @@ function drawOld() {
 		} else {
 			//strokeWeight(5);
 		}
-		
+
 		let xh = cx + cos(angle-HALF_PI + PI) * hoursDisplayRadius;
 		let yh = cy + sin(angle-HALF_PI + PI) * hoursDisplayRadius;
 		text(displayHours++, xh, yh);
 	}
-	
+
 	// Draw the hands of the clock
 	// Hours
 	strokeCap(ROUND);
@@ -365,7 +372,7 @@ function drawOld() {
 	strokeWeight(2);
 	fill("white");
 	ellipse(cx, cy, 20, 20);
-	
+
 	// Minutes
 	if(diplayMinutes){
 		line(cx, cy, cx + cos(m) * minutesRadius, cy + sin(m) * minutesRadius);
@@ -373,7 +380,7 @@ function drawOld() {
 		fill("white");
 		ellipse(cx, cy, 6, 6);
 	}
-	
+
 	/*// Seconds
 	stroke(255, 0, 0);
 	strokeWeight(2);
