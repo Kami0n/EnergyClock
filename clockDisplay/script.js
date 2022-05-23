@@ -80,6 +80,13 @@ function connect2() {
 			wedgeEnd = receivedMessage.end;
 		}
 		
+		if(receivedMessage.clear){
+			wedgeHours = null;
+			wedgeStart = null;
+			wedgeEnd = null;
+			varDrawWedge = false;
+		}
+		
 	};
 }
 connect2();
