@@ -13,7 +13,7 @@ let wedgeStart = null;
 let wedgeEnd = null;
 const zeroPad = (num, places) => String(num).padStart(places, '0')
 let sizeScreen = 1;
-let width, height;
+let winWidth = 500, winHeight = 500;
 
 let socketNodeRed;
 function connect1() {
@@ -80,31 +80,38 @@ function connect2() {
 			wedgeEnd = receivedMessage.end;
 		}
 		
+		if(receivedMessage.clear){
+			wedgeHours = null;
+			wedgeStart = null;
+			wedgeEnd = null;
+			varDrawWedge = false;
+		}
+		
 	};
 }
 connect2();
 
 function setup() {
-	width = windowWidth;
-	height = windowHeight;
-	createCanvas(width, height);
+	//winWidth = windowWidth;
+	//winHeight = windowHeight;
+	createCanvas(winWidth, winHeight);
 	sizeItems();
 }
 
 function windowResized() {
 	console.log("Window resized");
-	width = windowWidth;
-	height = windowHeight;
-	resizeCanvas(width, height);
+	//winWidth = windowWidth;
+	//winHeight = windowHeight;
+	resizeCanvas(winWidth, winHeight);
 	sizeItems();
 }
 
 function sizeItems(){
 	
-	if(windowHeight > windowWidth ){
-		sizeScreen = windowWidth / 1000;
+	if(height > width ){
+		sizeScreen = width / 1000;
 	}else{
-		sizeScreen = windowHeight / 1000;
+		sizeScreen = height / 1000;
 	}
 	
 	stroke(255);
@@ -132,7 +139,7 @@ function sizeItems(){
 function draw() {
 
 	clear();
-	background(150);
+	background(255);
 	
 	// Draw the clock background
 	noStroke();
