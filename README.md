@@ -44,7 +44,8 @@ Za mobilno aplikacijo uporabljamo preprosto aplikacijo na play store: MQTT Dash 
    - Username: lucmqtt
    - Password: vprašaj za geslo
    - Client ID: mqttdash-179c48d8
-3. Dodajte gumbe za upravljanje naprav z klikom na plus v desnem zgornjem kotu: Vnesite naslednje podatke:
+3. Dodajte gumbe za upravljanje naprav z klikom na plus v desnem zgornjem kotu: Vnesite naslednje podatke,
+Kjer je X številka naprave. Številke so: Pralni stroj (0), Avto (1), Gretje (2), Luč (3), Romba (4) :
    - Name: ime naprave
    - Topic: WaM
    - Enable Publishing
@@ -52,6 +53,7 @@ Za mobilno aplikacijo uporabljamo preprosto aplikacijo na play store: MQTT Dash 
    - On: X+
    - Off: X-
    - QoS(0)
-Kjer je X številka naprave. Številke so: Pralni stroj (0), Avto (1), Gretje (2), Luč (3), Romba (4) 
+
+
 
 Z tem ste uspešni uzpostavili vse dedle sistema in ta bi moral delovati normalno.
