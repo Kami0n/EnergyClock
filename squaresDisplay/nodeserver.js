@@ -6,7 +6,7 @@ process.on('uncaughtException', err => console.error('uncaughtException', err))
 process.on('unhandledRejection', err => console.error('unhandledRejection', err))
 
 const publicFolder = process.argv.length > 2 ? process.argv[2] : '.'
-const port = process.argv.length > 3 ? process.argv[3] : 4001
+const port = process.argv.length > 3 ? process.argv[3] : 4002
 const mediaTypes = {
 	zip: 'application/zip',
 	jpg: 'image/jpeg',

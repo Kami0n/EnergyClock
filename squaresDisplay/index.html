@@ -1,90 +1,16 @@
 <html>
-	<head>
-		<meta charset="utf-8">
-		<title>Mondrian Rectangles</title>
-		
-		<link rel="icon" type="image/x-icon" href="/favicon.png">
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Work+Sans&display=swap" rel="stylesheet">
-		
-		<link rel="stylesheet" href="style.css"/>
-		
-		<script src="https://d3js.org/d3.v4.js"></script>
-	</head>
-	<body>
-		<div id="my_dataviz"></div>
-	</body>
-	<script>
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="style.css"/>
+	<link rel="icon" type="image/x-icon" href="/favicon.png">
+	<link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
+	<!--		<script src="https://kit.fontawesome.com/9534551f92.js" crossorigin="anonymous"></script>-->
 
-		// set the dimensions and margins of the graph
-		var margin = {top: 10, right: 10, bottom: 10, left: 10},
-		width = window.innerWidth - margin.left - margin.right,
-		height = window.innerHeight - margin.top - margin.bottom;
-		
-		// append the svg object to the body of the page
-		var svg = d3.select("#my_dataviz")
-		.append("svg")
-		.attr("width", width + margin.left + margin.right)
-		.attr("height", height + margin.top + margin.bottom)
-		.append("g")
-		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-		
-		
-		function drawRects(data){
-			// stratify the data: reformatting for d3.js
-			var root = d3.stratify()
-				.id(function(d) { return d.name; })   // Name of the entity (column name is name in csv)
-				.parentId(function(d) { return d.parent; })   // Name of the parent (column name is parent in csv)
-				(data);
-			root.sum(function(d) { return +d.value })   // Compute the numeric value for each entity
-			
-			// Then d3.treemap computes the position of each element of the hierarchy
-			// The coordinates are added to the root object above
-			d3.treemap()
-				.size([width, height])
-				.padding(4)
-				(root)
-			
-			console.log(root.leaves())
-			// use this information to add rectangles:
-			svg
-				.selectAll("rect")
-				.data(root.leaves())
-				.enter()
-				.append("rect")
-				.attr('x', function (d) { return d.x0; })
-				.attr('y', function (d) { return d.y0; })
-				.attr('width', function (d) { return d.x1 - d.x0; })
-				.attr('height', function (d) { return d.y1 - d.y0; })
-				.style("stroke", "black")
-				.attr("stroke-width", function(d) { return 10; })
-				.style("fill", function (d) { if(d.data.color){ return d.data.color;} return "#69b3a2";} );
-			
-			// and to add the text labels
-			svg
-				.selectAll("text")
-				.data(root.leaves())
-				.enter()
-				.append("text")
-				.attr("x", function(d){ return Math.abs(d.x1-d.x0)/2+d.x0 })    // +10 to adjust position (more right)
-				.attr("y", function(d){ return Math.abs(d.y1-d.y0)/2+d.y0 })    // +20 to adjust position (lower)
-				.text(function(d){ return d.data.name })
-				.attr("font-size", "30px")
-				.attr("fill", "white")
-				.attr("font-family", "Work Sans")
-				.attr("dominant-baseline", "middle")
-				.attr("text-anchor", "middle")
-		}
-		
-		var data = [
-					{"name":"Origin","parent":"","value":0},
-					{"name":"Luči","parent":"Origin","value":20},
-					{"name":"Avto","parent":"Origin","value":20, "color":"red"},
-					{"name":"Klima","parent":"Origin","value":23},
-					{"name":"Pralni stroj","parent":"Origin","value":11},
-					{"name":"Televizija","parent":"Origin","value":1}
-				];
-		drawRects(data)
-		</script>
+	<!-- Load d3.js -->
+	<script src="https://d3js.org/d3.v4.js"></script>
+</head>
+<body>
+<div id="my_dataviz"></div>
+</body>
+<script src="script.js"></script>
 </html>
