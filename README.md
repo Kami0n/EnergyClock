@@ -7,7 +7,7 @@ Ki skrbi za sporočanje informacij o trenutni porabi sistema uporabniku.
 ### 2. Prikaz nadzorne plošče in ure
 Ki skrbi za sporočanje informacij o prihodnosti porabe energije uporabniku.
 ### 3. Mobilna aplikacija
-Ki uporabniku omogoča interakcijo z sistemom, prižiganje in ugašanje naprav.
+Ki uporabniku omogoča interakcijo s sistemom, prižiganje in ugašanje naprav.
 ### 4. Node-red
 Ki sprejema podatke iz mobilne aplikacije in jih obdeluje in pošilja prikazoma.
 
